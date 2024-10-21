@@ -1,0 +1,244 @@
+x-logging: &default-logging
+  driver: fluentd
+  options:
+    tag: "docker.{{.Name}}"
+    fluentd-address: outbrain_fluent-bit:24224
+    fluentd-async: "true"
+
+x-healthcheck: &default-healthcheck
+  interval: 10s
+  timeout: 5s
+  retries: 3
+  start_period: 10s
+
+x-resources: &default-resources
+  limits:
+    cpus: '0.50'
+    memory: 512M
+  reservations:
+    cpus: '0.25'
+    memory: 256M
+
+services:
+  outbrain_consul_node1:
+    image: ${CONSUL_DOCKER_IMAGE}
+    container_name: outbrain_consul_node1
+    ports:
+      - "8500:8500" # Consul UI
+      - "8600:8600/udp" # DNS Interface
+    volumes:
+      - ./consul/node1.json:/consul/config/node1.json
+    command: agent -server -ui -config-file=/consul/config/node1.json
+    networks:
+      - outbrain
+    environment:
+      - CONSUL_BIND_INTERFACE=eth0
+      - CONSUL_DISABLE_UPDATE_CHECK=true
+    healthcheck:
+      <<: *default-healthcheck
+      test: [ "CMD", "curl", "-f", "http://localhost:8500/v1/status/leader" ]
+    restart: unless-stopped
+    logging: *default-logging
+    deploy:
+      resources: *default-resources
+    depends_on:
+      outbrain_fluent-bit:
+        condition: service_healthy
+
+  outbrain_consul_node2:
+    image: ${CONSUL_DOCKER_IMAGE}
+    container_name: outbrain_consul_node2
+    volumes:
+      - ./consul/node2.json:/consul/config/node2.json
+    command: agent -server -config-file=/consul/config/node2.json
+    networks:
+      - outbrain
+    environment:
+      - CONSUL_BIND_INTERFACE=eth0
+      - CONSUL_DISABLE_UPDATE_CHECK=true
+    restart: unless-stopped
+    healthcheck:
+      <<: *default-healthcheck
+      test: [ "CMD", "consul", "members", "list" ]
+    logging: *default-logging
+    deploy:
+      resources: *default-resources
+    depends_on:
+      outbrain_fluent-bit:
+        condition: service_healthy
+
+  outbrain_consul_node3:
+    image: ${CONSUL_DOCKER_IMAGE}
+    container_name: outbrain_consul_node3
+    volumes:
+      - ./consul/node3.json:/consul/config/node3.json
+    command: agent -server -config-file=/consul/config/node3.json
+    networks:
+      - outbrain
+    environment:
+      - CONSUL_BIND_INTERFACE=eth0
+      - CONSUL_DISABLE_UPDATE_CHECK=true
+    restart: unless-stopped
+    healthcheck:
+      <<: *default-healthcheck
+      test: [ "CMD", "consul", "members", "list" ]
+    logging: *default-logging
+    deploy:
+      resources: *default-resources
+    depends_on:
+      outbrain_fluent-bit:
+        condition: service_healthy
+
+  outbrain_consul_node4:
+    image: ${CONSUL_DOCKER_IMAGE}
+    container_name: outbrain_consul_node4
+    volumes:
+      - ./consul/node4.json:/consul/config/node4.json
+    command: agent -server -config-file=/consul/config/node4.json
+    networks:
+      - outbrain
+    environment:
+      - CONSUL_BIND_INTERFACE=eth0
+      - CONSUL_DISABLE_UPDATE_CHECK=true
+    restart: unless-stopped
+    healthcheck:
+      <<: *default-healthcheck
+      test: [ "CMD", "consul", "members", "list" ]
+    logging: *default-logging
+    deploy:
+      resources: *default-resources
+    depends_on:
+      outbrain_fluent-bit:
+        condition: service_healthy
+
+  outbrain_prometheus:
+    image: ${PROMETHEUS_DOCKER_IMAGE}
+    container_name: outbrain_prometheus
+    networks:
+      - outbrain
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus-storage:/prometheus
+    restart: unless-stopped
+    ports:
+      - 10010:9090
+    healthcheck:
+      <<: *default-healthcheck
+      # test: [ "CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:10010/-/healthy" ]
+      test: [ "CMD", "curl", "-f", "http://localhost:10010/-/healthy" ]
+    logging: *default-logging
+    deploy:
+      resources: *default-resources
+    depends_on:
+      outbrain_fluent-bit:
+        condition: service_healthy
+
+  outbrain_grafana:
+    image: ${GRAFANA_DOCKER_IMAGE}
+    container_name: outbrain_grafana
+    env_file:
+      - .env
+    networks:
+      - outbrain
+    volumes:
+      - grafana-storage:/var/lib/grafana
+      - ./grafana/datasources/:/etc/grafana/provisioning/datasources/
+      - ./grafana/dashboards/:/var/lib/grafana/dashboards
+      - ./grafana/provisioning/dashboards.yml:/etc/grafana/provisioning/dashboards/dashboards.yml
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=GF_SECURITY_ADMIN_PASSWORD
+    restart: unless-stopped
+    ports:
+      - 10011:3000
+    healthcheck:
+      <<: *default-healthcheck
+      test: [ "CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:3000/api/health || exit 1" ]
+    logging: *default-logging
+    deploy:
+      resources: *default-resources
+    depends_on:
+      outbrain_fluent-bit:
+        condition: service_healthy
+
+  outbrain_fluent-bit:
+    build:
+      context: ./fluent-bit
+      args:
+        FLUENTBIT_DOCKER_IMAGE: ${FLUENTBIT_DOCKER_IMAGE}
+    env_file:
+      - .env
+    container_name: outbrain_fluent-bit
+    networks:
+      - outbrain
+    volumes:
+      - ./fluent-bit/fluent-bit.conf:/fluent-bit/etc/fluent-bit.conf
+    restart: unless-stopped
+    ports:
+      - 10012:24224
+      - 2020:2020
+    healthcheck:
+      <<: *default-healthcheck
+      test: [ "CMD", "/wget", "--quiet", "--output-document=-", "http://localhost:2020/api/v1/health" ]
+    logging: *default-logging
+    deploy:
+      resources: *default-resources
+
+
+    outbrain_cadvisor:
+      image: ${CADVISOR_DOCKER_IMAGE}
+      container_name: outbrain_cadvisor
+      volumes:
+        - /:/rootfs:ro
+        - /var/run:/var/run:ro
+        - /sys:/sys:ro
+        - /var/lib/docker/:/var/lib/docker:ro
+        - /dev/disk/:/dev/disk:ro
+      devices:
+        - /dev/kmsg:/dev/kmsg
+      privileged: true
+      networks:
+        - outbrain
+      restart: unless-stopped
+      ports:
+        - 10013:8080
+
+    outbrain_node_exporter:
+      image: ${NODE_EXPORTER_DOCKER_IMAGE}
+      container_name: outbrain_node_exporter
+      volumes:
+        - /proc:/host/proc:ro
+        - /sys:/host/sys:ro
+        - /:/rootfs:ro
+      command:
+        - '--path.procfs=/host/proc'
+        - '--path.rootfs=/rootfs'
+        - '--path.sysfs=/host/sys'
+        - '--collector.filesystem.mount-points-exclude=^/(sys|proc|dev|host|etc)($$|/)'
+      networks:
+        - outbrain
+      restart: unless-stopped
+      ports:
+        - 10014:9100
+
+    # loki:
+    #   image: grafana/loki:2.8.0
+    #   ports:
+    #     - "3100:3100"
+    #   command: -config.file=/etc/loki/local-config.yaml
+    #   networks:
+    #     - outbrain
+    # promtail:
+    #   image: grafana/promtail:2.8.0
+    #   volumes:
+    #     - /var/log:/var/log
+    #   command: -config.file=/etc/promtail/config.yml
+    #   networks:
+    #     - outbrain
+
+networks:
+  outbrain:
+    driver: bridge
+
+volumes:
+  grafana-storage:
+  prometheus-storage:

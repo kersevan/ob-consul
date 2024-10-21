@@ -1,0 +1,75 @@
+services:
+  consul-node1:
+    image: hashicorp/consul:1.20
+    container_name: consul-node1
+    ports:
+      - "8500:8500" # Consul UI
+      - "8600:8600/udp" # DNS Interface
+    volumes:
+      - ./consul/node1.json:/consul/config/node1.json
+    command: agent -server -ui -config-file=/consul/config/node1.json
+    networks:
+      - consul-cluster
+    environment:
+      - CONSUL_BIND_INTERFACE=eth0
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8500/v1/status/leader" ]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    restart: unless-stopped
+
+  consul-node2:
+    image: hashicorp/consul:1.20
+    container_name: consul-node2
+    volumes:
+      - ./consul/node2.json:/consul/config/node2.json
+    command: agent -server -config-file=/consul/config/node2.json
+    networks:
+      - consul-cluster
+    environment:
+      - CONSUL_BIND_INTERFACE=eth0
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8500/v1/status/leader" ]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    restart: unless-stopped
+
+  consul-node3:
+    image: hashicorp/consul:1.20
+    container_name: consul-node3
+    volumes:
+      - ./consul/node3.json:/consul/config/node3.json
+    command: agent -server -config-file=/consul/config/node3.json
+    networks:
+      - consul-cluster
+    environment:
+      - CONSUL_BIND_INTERFACE=eth0
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8500/v1/status/leader" ]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    restart: unless-stopped
+
+  consul-node4:
+    image: hashicorp/consul:1.20
+    container_name: consul-node4
+    volumes:
+      - ./consul/node4.json:/consul/config/node4.json
+    command: agent -server -config-file=/consul/config/node4.json
+    networks:
+      - consul-cluster
+    environment:
+      - CONSUL_BIND_INTERFACE=eth0
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8500/v1/status/leader" ]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    restart: unless-stopped
+
+networks:
+  consul-cluster:
+    driver: bridge

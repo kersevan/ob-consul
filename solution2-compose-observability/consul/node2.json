@@ -1,0 +1,18 @@
+{
+  "datacenter": "dc1",
+  "node_name": "node2",
+  "server": true,
+  "bootstrap_expect": 4,
+  "data_dir": "/consul/data",
+  "client_addr": "0.0.0.0",
+  "ui": true,
+  "retry_join": [
+    "outbrain_consul_node1",
+    "outbrain_consul_node3",
+    "outbrain_consul_node4"
+  ],
+  "telemetry": {
+    "prometheus_retention_time": "24h",
+    "disable_hostname": true
+  }
+}
