@@ -6,7 +6,13 @@ datasources:
     url: http://outbrain_prometheus:9090
     isDefault: true
 
-  - name: Fluent Bit
+  - name: Loki
     type: loki
     access: proxy
-    url: http://outbrain_fluent-bit:3100
+    url: http://outbrain_loki:3100
+    version: 1
+    isDefault: false
+    jsonData:
+      maxLines: 1000
+    basicAuth: false
+    editable: true

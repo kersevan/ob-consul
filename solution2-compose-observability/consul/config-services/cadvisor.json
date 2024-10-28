@@ -1,0 +1,20 @@
+{
+  "service": {
+    "check": {
+      "http": "http://outbrain_cadvisor:8080/health",
+      "interval": "15s",
+      "timeout": "2s"
+    },
+    "meta": {
+      "environment": "production",
+      "version": "v1"
+    },
+    "name": "cadvisor",
+    "port": 8080,
+    "tags": [
+      "metrics",
+      "monitoring",
+      "production"
+    ]
+  }
+}

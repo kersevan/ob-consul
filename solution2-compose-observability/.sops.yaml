@@ -1,0 +1,6 @@
+# .sops.yaml
+
+# This configuration tells SOPS to use Age for encrypting files.
+creation_rules:
+  - path_regex: .*\.env$
+    age: age1xxpwfuvy3fyst8sj29jlkm8hquke7daew6fkvm3s99fr4p9usf2qjdn0sa # Replace with your actual Age public key

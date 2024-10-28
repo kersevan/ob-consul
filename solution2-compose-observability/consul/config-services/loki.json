@@ -1,0 +1,19 @@
+{
+  "service": {
+    "check": {
+      "http": "http://outbrain_loki:3100/ready",
+      "interval": "15s",
+      "timeout": "2s"
+    },
+    "meta": {
+      "environment": "production",
+      "version": "v1"
+    },
+    "name": "loki",
+    "port": 3100,
+    "tags": [
+      "production",
+      "logs"
+    ]
+  }
+}

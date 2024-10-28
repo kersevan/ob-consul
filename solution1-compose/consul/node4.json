@@ -1,14 +1,14 @@
 {
+  "bootstrap_expect": 4,
+  "client_addr": "0.0.0.0",
+  "data_dir": "/consul/data",
   "datacenter": "dc1",
   "node_name": "node4",
-  "server": true,
-  "bootstrap_expect": 4,
-  "data_dir": "/consul/data",
-  "client_addr": "0.0.0.0",
-  "ui": true,
   "retry_join": [
     "consul-node1",
     "consul-node2",
     "consul-node3"
-  ]
+  ],
+  "server": true,
+  "ui": true
 }

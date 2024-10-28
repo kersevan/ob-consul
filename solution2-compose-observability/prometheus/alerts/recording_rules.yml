@@ -1,0 +1,14 @@
+groups:
+- name: recording_rules
+  rules:
+  # Container resource usage
+  - record: container_memory_usage_percent
+    expr: (container_memory_usage_bytes / container_spec_memory_limit_bytes) * 100
+
+  # Node resource usage
+  - record: node_memory_usage_percent
+    expr: (1 - node_memory_MemFree_bytes / node_memory_MemTotal_bytes) * 100
+
+  # Consul metrics
+  - record: consul_raft_leader_lastContact_seconds_max
+    expr: max(consul_raft_leader_lastContact_seconds) by (datacenter)

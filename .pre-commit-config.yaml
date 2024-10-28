@@ -1,17 +1,27 @@
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v4.3.0
+    rev: v5.0.0
     hooks:
-      - id: check-yaml
-      - id: check-json
-      - id: trailing-whitespace
-      - id: end-of-file-fixer
+      # Git state
       - id: check-merge-conflict
       - id: check-added-large-files
+      # Sensitive information
+      - id: detect-private-key
+      # Generic file state
+      - id: trailing-whitespace
       - id: mixed-line-ending
-        args: [--fix=lf]
-      - id: pretty-format-json
+      # - id: end-of-file-fixer
+      #   args: [--fix=lf]
+        exclude: .*\.tfvars$ # terraform fmt separates everything with blank lines leaving a trailing line at the end
+      - id: check-executables-have-shebangs
+      - id: requirements-txt-fixer
         args: [--no-sort-keys, --autofix, --no-ensure-ascii]
+      # Language syntax/formatting
+      - id: check-yaml
+      - id: check-json
+      - id: pretty-format-json
+        args: [--autofix]
+      - id: check-case-conflict
 
   - repo: https://github.com/adrienverge/yamllint
     rev: v1.35.1
@@ -20,25 +30,19 @@ repos:
         args: [-d relaxed]
 
   - repo: https://github.com/pre-commit/mirrors-eslint
-    rev: v9.12.0
+    rev: v9.13.0
     hooks:
       - id: eslint
         files: ^.*\.(js|ts)$
 
   - repo: https://github.com/bridgecrewio/checkov.git
-    rev: 2.0.975
+    rev: 3.2.269
     hooks:
       - id: checkov
         args: [-d .]
 
-  - repo: https://github.com/Agilicus/pre-commit-hook-k8svalidate.git
-    rev: v0.0.8
-    hooks:
-      - id: k8svalidate
-        files: .yaml$
-
   - repo: https://github.com/Yelp/detect-secrets
-    rev: v1.2.0
+    rev: v1.5.0
     hooks:
       - id: detect-secrets
 
@@ -47,12 +51,22 @@ repos:
     rev: 24.10.0
     hooks:
       - id: black
+        args: [--line-length=100]
+
+  - repo: https://github.com/PyCQA/flake8
+    rev: 7.1.1
+    hooks:
+      - id: flake8
+        args: [--max-line-length=100]
+
   - repo: https://github.com/PyCQA/isort
     rev: 5.13.2
     hooks:
       - id: isort
+        args: ["--profile", "black", --line-length=88]
+
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: "v0.6.9"
+    rev: "v0.7.0"
     hooks:
       - id: ruff
         args: ["--fix"]
@@ -63,13 +77,13 @@ repos:
 
   # Type checking
   - repo: https://github.com/pre-commit/mirrors-mypy
-    rev: v1.3.0
+    rev: v1.13.0
     hooks:
       - id: mypy
 
   # Terraform
   - repo: https://github.com/antonbabenko/pre-commit-terraform
-    rev: v1.77.1
+    rev: v1.96.1
     hooks:
       - id: terraform_fmt
       - id: terraform_tflint
@@ -84,4 +98,73 @@ repos:
   - repo: https://github.com/shellcheck-py/shellcheck-py
     rev: v0.10.0.1
     hooks:
-    -   id: shellcheck
+      - id: shellcheck
+
+  - repo: https://github.com/pryorda/dockerfilelint-precommit-hooks
+    rev: v0.1.0
+    hooks:
+      - id: dockerfilelint
+
+  - repo: https://github.com/sirosen/check-jsonschema
+    rev: 0.29.4
+    hooks:
+      - id: check-github-actions
+      - id: check-github-workflows
+
+
+  # # Python pip dependency check
+  # - repo: local
+  #   hooks:
+  #     - id: pip-outdated
+  #       name: "Check for outdated pip packages"
+  #       entry: bash -c 'pip list --outdated'
+  #       language: system
+  #       pass_filenames: false
+
+  # # # Node.js npm dependency check
+  # # - repo: local
+  # #   hooks:
+  # #     - id: npm-outdated
+  # #       name: "Check for outdated npm packages"
+  # #       entry: bash -c 'npm outdated'
+  # #       language: system
+  # #       pass_filenames: false
+
+  # # Docker image version outdated check using docker-outdated
+  # - repo: local
+  #   hooks:
+  #     - id: docker-outdated
+  #       name: "Check for outdated Docker images"
+  #       entry: bash -c 'docker-outdated'
+  #       language: system
+  #       pass_filenames: false
+
+  # # # Docker image security check using Trivy
+  # # - repo: local
+  # #   hooks:
+  # #     - id: trivy-scan
+  # #       name: "Scan Docker images with Trivy"
+  # #       entry: bash -c 'trivy image ${YOUR_DOCKER_IMAGE}' # Replace with your image name
+  # #       language: system
+  # #       pass_filenames: false
+
+  # # Python safety security scan
+  # - repo: local
+  #   hooks:
+  #     - id: safety-scan
+  #       name: "Run Safety to check for Python package vulnerabilities"
+  #       entry: bash -c 'safety check'
+  #       language: system
+  #       pass_filenames: false
+
+  # # npm audit security scan
+  # - repo: local
+  #   hooks:
+  #     - id: npm-audit
+  #       name: "Run npm audit for security vulnerabilities"
+  #       entry: bash -c 'npm audit'
+  #       language: system
+  #       pass_filenames: false
+
+# Global exclude pattern
+exclude: "docs|tests|examples|storage.*|wal|.*sops.*|.*encrypted.*"

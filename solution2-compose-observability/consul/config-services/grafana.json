@@ -1,0 +1,20 @@
+{
+  "service": {
+    "check": {
+      "http": "http://outbrain_grafana:3000/health",
+      "interval": "15s",
+      "timeout": "2s"
+    },
+    "meta": {
+      "environment": "production",
+      "version": "v1"
+    },
+    "name": "grafana",
+    "port": 3000,
+    "tags": [
+      "dashboard",
+      "monitoring",
+      "production"
+    ]
+  }
+}

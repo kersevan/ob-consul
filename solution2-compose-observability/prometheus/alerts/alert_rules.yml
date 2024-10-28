@@ -1,0 +1,61 @@
+groups:
+- name: node_alerts
+  rules:
+  - alert: HighCPUUsage
+    expr: 100 - (avg by(instance) (rate(node_cpu_seconds_total{mode="idle"}[5m])) * 100) > 80
+    for: 5m
+    labels:
+      severity: warning
+    annotations:
+      summary: "High CPU usage on {{ $labels.instance }}"
+      description: "CPU usage is above 80% for 5 minutes"
+
+  - alert: HighMemoryUsage
+    expr: node_memory_usage_percent > 85
+    for: 5m
+    labels:
+      severity: warning
+    annotations:
+      summary: "High memory usage on {{ $labels.instance }}"
+      description: "Memory usage is above 85%"
+
+- name: consul_alerts
+  rules:
+  - alert: ConsulLeaderLoss
+    expr: consul_raft_leader != 1
+    for: 1m
+    labels:
+      severity: critical
+    annotations:
+      summary: "Consul cluster has no leader"
+      description: "The Consul cluster has lost its leader and quorum may be at risk"
+
+  - alert: ConsulHighLatency
+    expr: consul_raft_leader_lastContact_seconds_max > 0.200
+    for: 5m
+    labels:
+      severity: warning
+    annotations:
+      summary: "High Consul latency detected"
+      description: "Consul cluster showing high latency between nodes"
+
+- name: fluentbit_alerts
+  rules:
+  - alert: FluentBitBufferSize
+    expr: fluentbit_input_bytes_total / fluentbit_output_bytes_total > 1.5
+    for: 15m
+    labels:
+      severity: warning
+    annotations:
+      summary: "Fluent Bit buffer growing"
+      description: "Fluent Bit input/output ratio indicates growing buffer"
+
+- name: loki_alerts
+  rules:
+  - alert: LokiRequestErrors
+    expr: rate(loki_request_duration_seconds_count{status_code=~"5.."}[5m]) > 0
+    for: 5m
+    labels:
+      severity: warning
+    annotations:
+      summary: "Loki is experiencing request errors"
