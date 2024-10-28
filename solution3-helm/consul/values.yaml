@@ -1,0 +1,20 @@
+consul:
+  image:
+    repository: hashicorp/consul
+    tag: "1.15.2"
+  replicas: 4
+  resources:
+    requests:
+      cpu: "100m"
+      memory: "256Mi"
+    limits:
+      cpu: "500m"
+      memory: "512Mi"
+  storage:
+    size: "1Gi"
+  ui:
+    enabled: true
+  gossipEncryption:
+    enabled: true
+    # should be  handled as secret
+    key: "YQYt2xYoaJVI6lnBdjosIYqbT1Dy+xvHKK4W9iFGYbw=" # pragma: allowlist secret

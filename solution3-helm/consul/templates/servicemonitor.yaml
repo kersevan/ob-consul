@@ -1,0 +1,13 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: consul-monitor
+spec:
+  selector:
+    matchLabels:
+      app: consul
+  endpoints:
+    - port: http
+      path: /v1/agent/metrics
+      interval: 15s
+      scrapeTimeout: 10s

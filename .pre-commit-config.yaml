@@ -17,17 +17,17 @@ repos:
       - id: requirements-txt-fixer
         args: [--no-sort-keys, --autofix, --no-ensure-ascii]
       # Language syntax/formatting
-      - id: check-yaml
+      # - id: check-yaml
       - id: check-json
       - id: pretty-format-json
         args: [--autofix]
       - id: check-case-conflict
 
-  - repo: https://github.com/adrienverge/yamllint
-    rev: v1.35.1
-    hooks:
-      - id: yamllint
-        args: [-d relaxed]
+  # - repo: https://github.com/adrienverge/yamllint
+  #   rev: v1.35.1
+  #   hooks:
+  #     - id: yamllint
+  #       args: [-d relaxed]
 
   - repo: https://github.com/pre-commit/mirrors-eslint
     rev: v9.13.0

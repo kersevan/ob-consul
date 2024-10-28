@@ -1,0 +1,24 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: consul-config
+data:
+  config.json: |
+    {
+      "datacenter": "dc1",
+      "data_dir": "/consul/data",
+      "log_level": "INFO",
+      "server": true,
+      "ui_config": {
+        "enabled": {{ .Values.consul.ui.enabled }}
+      },
+      "bootstrap_expect": {{ .Values.consul.replicas }},
+      "retry_join": ["consul-0.consul-headless", "consul-1.consul-headless", "consul-2.consul-headless", "consul-3.consul-headless"],
+      "client_addr": "0.0.0.0",
+      "encrypt": "{{ .Values.consul.gossipEncryption.key }}",
+      "service": {
+        "name": "consul",
+        "port": 8500,
+        "tags": ["consul-server"]
+      }
+    }
