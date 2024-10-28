@@ -2,9 +2,10 @@
 
 This repository contains a production-ready solution for deploying a 4-node Consul cluster with comprehensive monitoring capabilities. The solution is containerized using Docker Compose and includes additional monitoring and logging components for production-grade observability.
 
-Solution1 contains only consul, while solution2 contains more broad observability deployment.
+Solutions 1 and 2 are based on docker-compose, solution 3 is based on helm
+Solutions 1 and 3 contain only consul, while solution2 contains more broad observability deployment.
 
-## Architecture
+## Architecture solution2
 
 ### Core Components
 - 4-node Consul cluster for service discovery and health checking
@@ -32,16 +33,29 @@ Solution1 contains only consul, while solution2 contains more broad observabilit
 
 2. Update environment variables in `.env` and `.decrypted.secrets.env`
 
-3. Start the cluster:
+3. For docker compose:
+Start the cluster:
 ```bash
 docker-compose up -d
 ```
 
-4. Verify the cluster status:
+For helm:
+```bash
+helm install consul ./consul
+or
+helm upgrade consul ./consul
+
+```
+
+4. Compose: Verify the cluster status:
 ```bash
 docker exec outbrain_consul_node1 consul members list
 ```
 
+for helm:
+```
+minikube service consul-ui
+```
 ## Configuration Files
 
 ### Consul Configuration
@@ -61,7 +75,7 @@ docker exec outbrain_consul_node1 consul members list
 - Grafana: http://localhost:3000
 - Prometheus: http://localhost:9090
 
-## Troubleshooting
+## Troubleshooting compose
 
 1. Check cluster status:
 ```bash
